@@ -4,6 +4,7 @@ export const localGetItems = () => {
   if (storedContacts !== null) {
     const parsedContacts = JSON.parse(storedContacts);
     return parsedContacts;
+    // this.setState({ contacts: parsedContacts });
   }
   return [];
 };
