@@ -18,6 +18,8 @@ export const ContactList = ({ contacts, onDeleteContact }) => {
   );
 };
 
+// В данном случае, функция onDeleteContact вызывается с использованием стрелочной функции (callback) в обработчике события onClick. Это делается по следующим причинам: Передача аргумента: Вам нужно передать id контакта в функцию onDeleteContact. Если вы напишете просто onClick={onDeleteContact(id)}, то функция будет вызвана сразу при рендере компонента, а не при клике на кнопку. Использование стрелочной функции позволяет передать аргумент и вызвать функцию только при событии клика.
+
 ContactList.propTypes = {
   contacts: PropTypes.arrayOf(
     PropTypes.shape({
