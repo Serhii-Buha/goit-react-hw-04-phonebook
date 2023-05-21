@@ -1,37 +1,21 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Container } from './ContactForm/ContactForm.styled';
 import { ContactForm } from './ContactForm/ContactForm';
 import { Filter } from './Filter/Filter';
 import { ContactList } from './ContactList/ContactList';
+import { localGetItems } from '../utils/localGetItems';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export const App = () => {
+  const [contacts, setContacts] = useState(localGetItems);
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+    //
+  }, [contacts]);
 
-    if (contacts !== null) {
-      const parsedContacts = JSON.parse(contacts);
-      this.setState({ contacts: parsedContacts });
-      return;
-    }
-    this.setState({ contacts: [] });
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-
-  formSubmitHandler = data => {
-    console.log(data);
-
-    const { contacts } = this.state;
+  const formSubmitHandler = data => {
     const isExist = contacts.some(contact => contact.name === data.name);
 
     if (isExist) {
@@ -45,20 +29,14 @@ export class App extends Component {
       number: data.number,
     };
 
-    this.setState(prevState => ({
-      contacts: [newContact, ...prevState.contacts],
-    }));
+    setContacts(prevContacts => [newContact, ...prevContacts]);
   };
 
-  changeFilter = e => {
-    this.setState({
-      filter: e.currentTarget.value,
-    });
+  const changeFilter = e => {
+    setFilter(e.currentTarget.value);
   };
 
-  getVisibleFilter = () => {
-    const { contacts, filter } = this.state;
-
+  const getVisibleFilter = () => {
     const normalizeFilter = filter.toLowerCase();
 
     return contacts.filter(todo =>
@@ -66,31 +44,28 @@ export class App extends Component {
     );
   };
 
-  deleteContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
+  const deleteContact = contactId => {
+    setContacts(prevContacts =>
+      prevContacts.filter(contact => contact.id !== contactId)
+    );
   };
 
-  render() {
-    const filterContacts = this.getVisibleFilter();
-    const { contacts } = this.state;
+  const filteredContacts = getVisibleFilter();
 
-    return (
-      <Container>
-        <h1>Phonebook</h1>
-        <ContactForm onSubmit={this.formSubmitHandler} />
+  return (
+    <Container>
+      <h1>Phonebook</h1>
+      <ContactForm onSubmit={formSubmitHandler} />
 
-        <h2>Contacts</h2>
-        <Filter value={this.state.filter} onChange={this.changeFilter} />
+      <h2>Contacts</h2>
+      <Filter value={filter} onChange={changeFilter} />
 
-        {contacts.length > 0 && (
-          <ContactList
-            contacts={filterContacts}
-            onDeleteContact={this.deleteContact}
-          />
-        )}
-      </Container>
-    );
-  }
-}
+      {contacts.length > 0 && (
+        <ContactList
+          contacts={filteredContacts}
+          onDeleteContact={deleteContact}
+        />
+      )}
+    </Container>
+  );
+};
